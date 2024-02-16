@@ -10,9 +10,9 @@
   <extensions defaultExtensionNs="com.intellij">
   </extensions>
   <actions>
-    <action id="com.bekmnsrw.plugin.recompose.CountRecompositionsAction"
-            class="com.bekmnsrw.recompose.CountRecompositionsAction" text="Count Number of Recompositions"
-            description="Counts number of recompositions of Composable function">
+    <action id="com.bekmnsrw.plugin.recompose.InitRecompositionCounterAction"
+            class="com.bekmnsrw.recompose.InitRecompositionCounterAction" text="Init RecompositionCounter"
+            description="Initializing inline @Composable function to count number of recompositions">
       <add-to-group group-id="KotlinGenerateGroup" anchor="last"/>
     </action>
   </actions>
