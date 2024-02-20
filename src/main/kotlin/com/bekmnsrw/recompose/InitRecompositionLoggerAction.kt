@@ -1,5 +1,11 @@
 package com.bekmnsrw.recompose;
 
+import com.bekmnsrw.recompose.util.Constants.APPLICATION
+import com.bekmnsrw.recompose.util.Constants.COMPOSABLE_ANNOTATION_FQ_NAME
+import com.bekmnsrw.recompose.util.Constants.CURRENT_RECOMPOSE_SCOPE_FQ_NAME
+import com.bekmnsrw.recompose.util.Constants.LOG_FQ_NAME
+import com.bekmnsrw.recompose.util.Constants.REMEMBER_FQ_NAME
+import com.bekmnsrw.recompose.util.Constants.SIDE_EFFECT_FQ_NAME
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
@@ -16,28 +22,21 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtPsiFactory
 import org.jetbrains.kotlin.psi.psiUtil.findDescendantOfType
 
-class InitRecompositionCounterAction : KotlinGenerateActionBase() {
-
-    private companion object {
-        const val COMPOSABLE_ANNOTATION_FQ_NAME = "androidx.compose.runtime.Composable"
-        const val REMEMBER_FQ_NAME = "androidx.compose.runtime.remember"
-        const val LOG_FQ_NAME = "android.util.Log"
-        const val SIDE_EFFECT_FQ_NAME = "androidx.compose.runtime.SideEffect"
-    }
+class InitRecompositionLoggerAction : KotlinGenerateActionBase() {
 
     override fun invoke(project: Project, editor: Editor, psiFile: PsiFile) {
         (psiFile as? KtFile)?.let { ktPsiFile ->
             val ktClass = ktPsiFile.findDescendantOfType<KtClass>() ?: return
-            val refClassText = provideRefClassText()
-            val recompositionCounterText = provideRecompositionCounterText()
+            val recompositionCounterClassText = provideRecompositionCounterClassText()
+            val recompositionLoggerText = provideRecompositionLoggerText()
 
             val ktPsiFactory = KtPsiFactory(project)
-            val refClass = ktPsiFactory.createClass(refClassText)
-            val recompositionCounterFun = ktPsiFactory.createFunction(recompositionCounterText)
+            val recompositionCounterClass = ktPsiFactory.createClass(recompositionCounterClassText)
+            val recompositionLoggerFun = ktPsiFactory.createFunction(recompositionLoggerText)
 
             project.executeWriteCommand("InitRecompositionCounterAction") {
-                ktPsiFile.add(refClass)
-                ktPsiFile.add(recompositionCounterFun)
+                ktPsiFile.add(recompositionCounterClass)
+                ktPsiFile.add(recompositionLoggerFun)
                 ktClass.containingKtFile.commitAndUnblockDocument()
                 ShortenReferences.DEFAULT.process(ktPsiFile)
                 CodeStyleManager.getInstance(project).reformat(ktClass)
@@ -49,26 +48,23 @@ class InitRecompositionCounterAction : KotlinGenerateActionBase() {
         return targetClass is KtClass &&
                 InheritanceUtil.isInheritor(
                     targetClass.toLightClass(),
-                    "android.app.Application"
+                    APPLICATION
                 )
     }
 
-    private fun provideRefClassText(): String = """ class Ref(var value: Int) """
+    private fun provideRecompositionCounterClassText(): String = """ class RecompositionCounter(var value: Int) """
 
-    private fun provideRecompositionCounterText(
-        message: String = "\$message",
-        refValue: String = "\${ref.value}"
-    ): String = """
+    private fun provideRecompositionLoggerText(): String = """
         @$COMPOSABLE_ANNOTATION_FQ_NAME
-        inline fun RecompositionCounter(
-            tag: String,
-            message: String = "",
+        inline fun RecompositionLogger(
+            tag: String = "RecompositionLogger",
+            message: String,
             shouldLog: (count: Int) -> Boolean = { true }
         ) {
-            val ref = $REMEMBER_FQ_NAME { Ref(0) }
-            $SIDE_EFFECT_FQ_NAME { ref.value++ }
-            if (shouldLog(ref.value)) { 
-                $LOG_FQ_NAME.d(tag, "Compositions: $message $refValue") 
+            val recompositionCounter = $REMEMBER_FQ_NAME { RecompositionCounter(0) }
+            $SIDE_EFFECT_FQ_NAME { recompositionCounter.value++ }
+            if (shouldLog(recompositionCounter.value)) { 
+                $LOG_FQ_NAME.d(tag, "${'$'}message; ${'$'}{recompositionCounter.value}; ${'$'}${'{'}$CURRENT_RECOMPOSE_SCOPE_FQ_NAME${'}'}") 
             }
         }
     """

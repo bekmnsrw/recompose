@@ -10,10 +10,18 @@
   <extensions defaultExtensionNs="com.intellij">
   </extensions>
   <actions>
-    <action id="com.bekmnsrw.plugin.recompose.InitRecompositionCounterAction"
-            class="com.bekmnsrw.recompose.InitRecompositionCounterAction" text="Init RecompositionCounter"
+    <action id="com.bekmnsrw.plugin.recompose.InitRecompositionLoggerAction"
+            class="com.bekmnsrw.recompose.InitRecompositionLoggerAction" text="Init RecompositionLogger"
             description="Initializing inline @Composable function to count number of recompositions">
       <add-to-group group-id="KotlinGenerateGroup" anchor="last"/>
     </action>
   </actions>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <intentionAction>
+      <language>kotlin</language>
+      <className>com.bekmnsrw.recompose.ImportRecompositionLoggerAction</className>
+      <category>SDK intentions</category>
+    </intentionAction>
+  </extensions>
 </idea-plugin>
