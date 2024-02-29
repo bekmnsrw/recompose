@@ -4,7 +4,7 @@ plugins {
   id("org.jetbrains.intellij") version "1.16.1"
 }
 
-group = "com.bekmnsrw.plugin.recompose"
+group = "com.bekmnsrw.plugin.recomposer"
 version = "1.0-SNAPSHOT"
 
 repositories {

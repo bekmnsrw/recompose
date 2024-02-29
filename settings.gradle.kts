@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "recompose"
+rootProject.name = "recomposer"

@@ -2,26 +2,19 @@
   <id>com.bekmnsrw.plugin.recompose.recompose</id>
   <name>Recompose</name>
   <vendor email="ilya.bekmansurov@gmail.com">bekmnsrw</vendor>
-  <description><![CDATA[IntelliJ IDEA plugin to debug recomposition process of Composable functions]]></description>
+  <description><![CDATA[IntelliJ IDEA plugin for Recomposer library]]></description>
 
   <depends>com.intellij.modules.platform</depends>
   <depends>org.jetbrains.kotlin</depends>
 
   <extensions defaultExtensionNs="com.intellij">
   </extensions>
+
   <actions>
-    <action id="com.bekmnsrw.plugin.recompose.InitRecompositionLoggerAction"
-            class="com.bekmnsrw.recompose.InitRecompositionLoggerAction" text="Init RecompositionLogger"
-            description="Initializing inline @Composable function to count number of recompositions">
-      <add-to-group group-id="KotlinGenerateGroup" anchor="last"/>
+    <action id="com.bekmnsrw.plugin.recompose.CustomizeRecomposerAction"
+            class="com.bekmnsrw.recomposer.CustomizeRecomposerAction" text="Customize Recomposer"
+            description="Overriding Recomposer tag and logger">
+      <add-to-group group-id="KotlinGenerateGroup" anchor="first"/>
     </action>
   </actions>
-
-  <extensions defaultExtensionNs="com.intellij">
-    <intentionAction>
-      <language>kotlin</language>
-      <className>com.bekmnsrw.recompose.ImportRecompositionLoggerAction</className>
-      <category>SDK intentions</category>
-    </intentionAction>
-  </extensions>
 </idea-plugin>
