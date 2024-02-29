@@ -1,6 +1,10 @@
 package com.bekmnsrw.recomposer.util
 
+import com.bekmnsrw.recomposer.util.Constants.APPLICATION
+import com.intellij.psi.util.InheritanceUtil
+import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.name.FqName
+import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtPsiFactory
 import org.jetbrains.kotlin.resolve.ImportPath
@@ -10,19 +14,27 @@ fun addImport(
     ktPsiFile: KtFile,
     fqName: String
 ) {
-    val isImportExists = ktPsiFile.importList?.imports?.any {
-        it.importedFqName?.asString() == fqName
+    val isImportExists = ktPsiFile.importList?.imports?.any { ktImportDirective ->
+        ktImportDirective.importedFqName?.asString() == fqName
     }
 
     requireNotNull(isImportExists)
 
     if (isImportExists == false) {
-        val importDirective = ktPsiFactory.createImportDirective(
-            ImportPath(
-                fqName = FqName(fqName),
-                isAllUnder = false
+        ktPsiFile.importList?.add(
+            ktPsiFactory.createImportDirective(
+                ImportPath(
+                    fqName = FqName(fqName),
+                    isAllUnder = false
+                )
             )
         )
-        ktPsiFile.importList?.add(importDirective)
     }
 }
+
+fun isApplicationInheritor(
+    targetClass: KtClassOrObject
+): Boolean = InheritanceUtil.isInheritor(
+    targetClass.toLightClass(),
+    APPLICATION
+)

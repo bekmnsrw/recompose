@@ -18,7 +18,6 @@ object Constants {
     const val RECOMPOSER_CONFIG_FQ_NAME = "com.bekmnsrw.recomposer.RecomposerConfig"
     const val RECOMPOSER_CONFIG_SHORTEN_NAME = "RecomposerConfig"
     const val RECOMPOSER_CONFIG_INIT = "RecomposerConfig.init"
-    const val CUSTOMIZE_RECOMPOSER_EXECUTE_WRITE_COMMAND_NAME = "CustomizeRecomposer"
 
     const val COMPOSABLE_ANNOTATION_SHORT_NAME = "Composable"
 }

@@ -47,9 +47,7 @@ class InsertRecomposerAction : PsiElementBaseIntentionAction(), IntentionAction 
             addImport(ktPsiFactory, ktPsiFile, RECOMPOSER_FQ_NAME)
         }
 
-        val recomposer = provideRecomposer()
-        val recomposerExpression = ktPsiFactory.createExpression(recomposer)
-
+        val recomposerExpression = ktPsiFactory.createExpression(provideRecomposer())
         val cursorOffset = editor?.caretModel?.offset ?: return
         val psiUnderCursor = ktPsiFile.findElementAt(cursorOffset) ?: return
 
