@@ -7,6 +7,7 @@ import com.bekmnsrw.recomposer.util.Constants.RECOMPOSER_CONFIG_FQ_NAME
 import com.bekmnsrw.recomposer.util.Constants.RECOMPOSER_CONFIG_INIT
 import com.bekmnsrw.recomposer.util.Constants.RECOMPOSER_CONFIG_SHORTEN_NAME
 import com.bekmnsrw.recomposer.util.Constants.SUPER_ON_CREATE_CALL
+import com.bekmnsrw.recomposer.util.addImport
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
@@ -15,11 +16,9 @@ import com.intellij.psi.util.InheritanceUtil
 import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.idea.actions.generate.KotlinGenerateActionBase
 import org.jetbrains.kotlin.idea.util.application.executeWriteCommand
-import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.findDescendantOfType
 import org.jetbrains.kotlin.psi.psiUtil.findFunctionByName
-import org.jetbrains.kotlin.resolve.ImportPath
 
 class CustomizeRecomposerAction : KotlinGenerateActionBase() {
 
@@ -29,7 +28,7 @@ class CustomizeRecomposerAction : KotlinGenerateActionBase() {
             val ktClass = ktPsiFile.findDescendantOfType<KtClass>() ?: return
 
             project.executeWriteCommand(CUSTOMIZE_RECOMPOSER_EXECUTE_WRITE_COMMAND_NAME) {
-                addRecomposerConfigImport(ktPsiFactory, ktPsiFile)
+                addImport(ktPsiFactory, ktPsiFile, RECOMPOSER_CONFIG_FQ_NAME)
             }
 
             when (val onCreate = ktClass.findFunctionByName(ON_CREATE_FUN_NAME)) {
@@ -111,22 +110,4 @@ class CustomizeRecomposerAction : KotlinGenerateActionBase() {
             )
         }    
     """.trimIndent()
-
-    private fun addRecomposerConfigImport(ktPsiFactory: KtPsiFactory, ktPsiFile: KtFile) {
-        val isImportExists = ktPsiFile.importList?.imports?.any {
-            it.importedFqName?.asString() == RECOMPOSER_CONFIG_FQ_NAME
-        }
-
-        requireNotNull(isImportExists)
-
-        if (isImportExists == false) {
-            val importDirective = ktPsiFactory.createImportDirective(
-                ImportPath(
-                    fqName = FqName(RECOMPOSER_CONFIG_FQ_NAME),
-                    isAllUnder = false
-                )
-            )
-            ktPsiFile.importList?.add(importDirective)
-        }
-    }
 }

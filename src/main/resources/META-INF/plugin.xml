@@ -8,6 +8,11 @@
   <depends>org.jetbrains.kotlin</depends>
 
   <extensions defaultExtensionNs="com.intellij">
+    <intentionAction>
+      <language>kotlin</language>
+      <className>com.bekmnsrw.recomposer.InsertRecomposerAction</className>
+      <category>Recomposer intentions</category>
+    </intentionAction>
   </extensions>
 
   <actions>
