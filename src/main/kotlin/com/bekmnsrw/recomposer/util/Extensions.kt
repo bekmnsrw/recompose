@@ -1,13 +1,19 @@
 package com.bekmnsrw.recomposer.util
 
 import com.bekmnsrw.recomposer.util.Constants.APPLICATION
+import com.bekmnsrw.recomposer.util.Constants.COMPOSABLE_FQ_NAME
+import com.bekmnsrw.recomposer.util.Constants.MATERIAL
+import com.bekmnsrw.recomposer.util.Constants.MATERIAL3
+import com.intellij.psi.PsiElement
 import com.intellij.psi.util.InheritanceUtil
 import org.jetbrains.kotlin.asJava.toLightClass
+import org.jetbrains.kotlin.idea.base.psi.kotlinFqName
+import org.jetbrains.kotlin.idea.caches.resolve.analyze
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.psi.KtClassOrObject
-import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.psi.KtPsiFactory
+import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.ImportPath
+import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 
 fun addImport(
     ktPsiFactory: KtPsiFactory,
@@ -32,9 +38,30 @@ fun addImport(
     }
 }
 
-fun isApplicationInheritor(
-    targetClass: KtClassOrObject
-): Boolean = InheritanceUtil.isInheritor(
-    targetClass.toLightClass(),
-    APPLICATION
-)
+fun isApplicationInheritor(targetClass: KtClassOrObject): Boolean {
+    return InheritanceUtil.isInheritor(
+        targetClass.toLightClass(),
+        APPLICATION
+    )
+}
+
+fun isComposableFun(psiElement: PsiElement): Boolean {
+    val bindingContext = (psiElement.containingFile as KtFile).analyze(BodyResolveMode.FULL)
+    val ktReferenceExpression = psiElement.context as KtReferenceExpression
+    val resolvedPsiElement = ktReferenceExpression.references.firstOrNull()?.resolve()
+    resolvedPsiElement?.let { psi ->
+        bindingContext[BindingContext.DECLARATION_TO_DESCRIPTOR, psi]?.annotations?.forEach { annotation ->
+            if (annotation.fqName == FqName(COMPOSABLE_FQ_NAME)) return true
+        }
+        val fqName = psi.kotlinFqName.toString()
+        if (fqName.contains(MATERIAL) || fqName.contains(MATERIAL3)) return true
+    }
+    return false
+}
+
+fun isContainsString(ktCallExpression: KtCallExpression, string: String): Boolean {
+    ktCallExpression.valueArguments.forEach { ktValueArgument ->
+        if (ktValueArgument.text.contains(string)) return true
+    }
+    return false
+}

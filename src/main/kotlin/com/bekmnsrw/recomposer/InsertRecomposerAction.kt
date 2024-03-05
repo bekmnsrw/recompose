@@ -1,12 +1,13 @@
 package com.bekmnsrw.recomposer
 
 import com.bekmnsrw.recomposer.util.Constants.BLOCK_ELEMENT_TYPE
-import com.bekmnsrw.recomposer.util.Constants.COMPOSABLE_ANNOTATION_SHORT_NAME
+import com.bekmnsrw.recomposer.util.Constants.COMPOSABLE_SHORT_NAME
 import com.bekmnsrw.recomposer.util.Constants.FUNCTION_LITERAL_ELEMENT_TYPE
 import com.bekmnsrw.recomposer.util.Constants.FUN_ELEMENT_TYPE
 import com.bekmnsrw.recomposer.util.Constants.INSERT_RECOMPOSER
-import com.bekmnsrw.recomposer.util.Constants.RECOMPOSER
+import com.bekmnsrw.recomposer.util.Constants.RECOMPOSER_NAME
 import com.bekmnsrw.recomposer.util.Constants.RECOMPOSER_FQ_NAME
+import com.bekmnsrw.recomposer.util.Constants.provideRecomposerFunReference
 import com.bekmnsrw.recomposer.util.addImport
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction
@@ -16,13 +17,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.util.elementType
-import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.psi.KtFunction
-import org.jetbrains.kotlin.psi.KtPsiFactory
+import org.jetbrains.kotlin.psi.*
 
 class InsertRecomposerAction : PsiElementBaseIntentionAction(), IntentionAction {
 
-    override fun getFamilyName(): String = RECOMPOSER
+    override fun getFamilyName(): String = RECOMPOSER_NAME
 
     override fun getText(): String = INSERT_RECOMPOSER
 
@@ -32,7 +31,7 @@ class InsertRecomposerAction : PsiElementBaseIntentionAction(), IntentionAction 
 
         if (psiElementContext == BLOCK_ELEMENT_TYPE && psiElementContextParent.elementType.toString() == FUN_ELEMENT_TYPE) {
             (psiElementContextParent as KtFunction).annotationEntries.forEach { annotationEntry ->
-                if (annotationEntry.shortName.toString() == COMPOSABLE_ANNOTATION_SHORT_NAME) return true
+                if (annotationEntry.shortName.toString() == COMPOSABLE_SHORT_NAME) return true
             }
         }
 
@@ -47,7 +46,7 @@ class InsertRecomposerAction : PsiElementBaseIntentionAction(), IntentionAction 
             addImport(ktPsiFactory, ktPsiFile, RECOMPOSER_FQ_NAME)
         }
 
-        val recomposerExpression = ktPsiFactory.createExpression(provideRecomposer())
+        val recomposerExpression = ktPsiFactory.createExpression(provideRecomposerFunReference())
         val cursorOffset = editor?.caretModel?.offset ?: return
         val psiUnderCursor = ktPsiFile.findElementAt(cursorOffset) ?: return
 
@@ -61,11 +60,4 @@ class InsertRecomposerAction : PsiElementBaseIntentionAction(), IntentionAction 
             CodeStyleManager.getInstance(project).reformat(ktPsiFile)
         }
     }
-
-    private fun provideRecomposer(): String = """
-        Recomposer(
-            trackingComposableArguments = mapOf(),
-            composableName = ""
-        )
-    """.trimIndent()
 }

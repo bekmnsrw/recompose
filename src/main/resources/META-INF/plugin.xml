@@ -15,6 +15,14 @@
     </intentionAction>
   </extensions>
 
+  <extensions defaultExtensionNs="com.intellij">
+    <intentionAction>
+      <language>kotlin</language>
+      <className>com.bekmnsrw.recomposer.InsertRecomposerHighlighterAction</className>
+      <category>Recomposer intentions</category>
+    </intentionAction>
+  </extensions>
+
   <actions>
     <action id="com.bekmnsrw.plugin.recompose.CustomizeRecomposerAction"
             class="com.bekmnsrw.recomposer.CustomizeRecomposerAction" text="Customize Recomposer"
