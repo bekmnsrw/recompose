@@ -21,6 +21,9 @@
       <className>com.bekmnsrw.recomposer.InsertRecomposerHighlighterAction</className>
       <category>Recomposer intentions</category>
     </intentionAction>
+
+    <annotator language="kotlin" implementationClass="com.bekmnsrw.recomposer.stability.HighlightFunctionParametersAction"/>
+
   </extensions>
 
   <actions>
