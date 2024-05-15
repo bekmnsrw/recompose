@@ -1,67 +1,53 @@
 package com.bekmnsrw.recomposer.util
 
-import com.bekmnsrw.recomposer.util.Constants.APPLICATION
-import com.bekmnsrw.recomposer.util.Constants.COMPOSABLE_FQ_NAME
-import com.bekmnsrw.recomposer.util.Constants.MATERIAL
-import com.bekmnsrw.recomposer.util.Constants.MATERIAL3
-import com.intellij.psi.PsiElement
-import com.intellij.psi.util.InheritanceUtil
-import org.jetbrains.kotlin.asJava.toLightClass
-import org.jetbrains.kotlin.idea.base.psi.kotlinFqName
+import com.bekmnsrw.recomposer.util.Constants.COMPOSABLE_FUNCTION
+import com.bekmnsrw.recomposer.util.Constants.EXPLICIT_GROUPS_COMPOSABLE_FQ_NAME
+import com.bekmnsrw.recomposer.util.Constants.NON_RESTARTABLE_COMPOSABLE_FQ_NAME
+import org.jetbrains.kotlin.descriptors.PropertyDescriptor
+import org.jetbrains.kotlin.idea.base.utils.fqname.fqName
 import org.jetbrains.kotlin.idea.caches.resolve.analyze
+import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
+import org.jetbrains.kotlin.js.resolve.diagnostics.findPsi
+import org.jetbrains.kotlin.lexer.KtTokens
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.psi.KtAnnotationEntry
+import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.kotlin.psi.KtProperty
 import org.jetbrains.kotlin.resolve.BindingContext
-import org.jetbrains.kotlin.resolve.ImportPath
+import org.jetbrains.kotlin.resolve.calls.util.getType
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
+import org.jetbrains.kotlin.types.KotlinType
+import org.jetbrains.kotlin.types.typeUtil.isUnit
 
-fun addImport(
-    ktPsiFactory: KtPsiFactory,
-    ktPsiFile: KtFile,
-    fqName: String
-) {
-    val isImportExists = ktPsiFile.importList?.imports?.any { ktImportDirective ->
-        ktImportDirective.importedFqName?.asString() == fqName
-    }
+fun KtNamedFunction.hasAnnotation(fqString: String): Boolean =
+    annotationEntries.any { annotation -> annotation.fqNameMatches(fqString) }
 
-    requireNotNull(isImportExists)
+fun KtNamedFunction.hasAnnotation(fqName: FqName): Boolean = hasAnnotation(fqName.asString())
 
-    if (isImportExists == false) {
-        ktPsiFile.importList?.add(
-            ktPsiFactory.createImportDirective(
-                ImportPath(
-                    fqName = FqName(fqName),
-                    isAllUnder = false
-                )
-            )
-        )
-    }
+fun KtAnnotationEntry.fqNameMatches(fqName: String): Boolean {
+    val shortName = shortName?.asString() ?: return false
+    return fqName.endsWith(shortName) && fqName == getQualifiedName()
 }
 
-fun isApplicationInheritor(targetClass: KtClassOrObject): Boolean {
-    return InheritanceUtil.isInheritor(
-        targetClass.toLightClass(),
-        APPLICATION
-    )
+fun KtAnnotationEntry.getQualifiedName(): String? {
+    return analyze(BodyResolveMode.PARTIAL).get(BindingContext.ANNOTATION, this)?.fqName?.asString()
 }
 
-fun isComposableFun(psiElement: PsiElement): Boolean {
-    val bindingContext = (psiElement.containingFile as KtFile).analyze(BodyResolveMode.FULL)
-    val ktReferenceExpression = psiElement.context as KtReferenceExpression
-    val resolvedPsiElement = ktReferenceExpression.references.firstOrNull()?.resolve()
-    resolvedPsiElement?.let { psi ->
-        bindingContext[BindingContext.DECLARATION_TO_DESCRIPTOR, psi]?.annotations?.forEach { annotation ->
-            if (annotation.fqName == FqName(COMPOSABLE_FQ_NAME)) return true
-        }
-        val fqName = psi.kotlinFqName.toString()
-        if (fqName.contains(MATERIAL) || fqName.contains(MATERIAL3)) return true
-    }
-    return false
+fun KtNamedFunction.isRestartable(): Boolean = when {
+    isLocal -> false
+    hasModifier(KtTokens.INLINE_KEYWORD) -> false
+    hasAnnotation(NON_RESTARTABLE_COMPOSABLE_FQ_NAME) -> false
+    hasAnnotation(EXPLICIT_GROUPS_COMPOSABLE_FQ_NAME) -> false
+    resolveToDescriptorIfAny()?.returnType?.isUnit() == false -> false
+    else -> true
 }
 
-fun isContainsString(ktCallExpression: KtCallExpression, string: String): Boolean {
-    ktCallExpression.valueArguments.forEach { ktValueArgument ->
-        if (ktValueArgument.text.contains(string)) return true
-    }
-    return false
+fun KotlinType.isSyntheticComposableFunction() = fqName?.asString()
+    .orEmpty()
+    .startsWith(COMPOSABLE_FUNCTION)
+
+internal fun PropertyDescriptor.resolveDelegateType(): KotlinType? {
+    val expression = (this.findPsi() as? KtProperty)?.delegateExpression
+    val bindingContext = expression?.analyze() ?: return null
+    return expression.getType(bindingContext)
 }

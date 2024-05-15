@@ -1,4 +1,4 @@
-package com.bekmnsrw.recomposer;
+package com.bekmnsrw.recomposer.action;
 
 import com.bekmnsrw.recomposer.util.Constants.ON_CREATE_FUN_NAME
 import com.bekmnsrw.recomposer.util.Constants.RECOMPOSER_CONFIG_FQ_NAME

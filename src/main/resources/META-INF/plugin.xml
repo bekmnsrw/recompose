@@ -10,7 +10,7 @@
   <extensions defaultExtensionNs="com.intellij">
     <intentionAction>
       <language>kotlin</language>
-      <className>com.bekmnsrw.recomposer.InsertRecomposerAction</className>
+      <className>com.bekmnsrw.recomposer.action.InsertRecomposerAction</className>
       <category>Recomposer intentions</category>
     </intentionAction>
   </extensions>
@@ -18,7 +18,7 @@
   <extensions defaultExtensionNs="com.intellij">
     <intentionAction>
       <language>kotlin</language>
-      <className>com.bekmnsrw.recomposer.InsertRecomposerHighlighterAction</className>
+      <className>com.bekmnsrw.recomposer.action.InsertRecomposerHighlighterAction</className>
       <category>Recomposer intentions</category>
     </intentionAction>
 
@@ -28,7 +28,7 @@
 
   <actions>
     <action id="com.bekmnsrw.plugin.recompose.CustomizeRecomposerAction"
-            class="com.bekmnsrw.recomposer.CustomizeRecomposerAction" text="Customize Recomposer"
+            class="com.bekmnsrw.recomposer.action.CustomizeRecomposerAction" text="Customize Recomposer"
             description="Overriding Recomposer tag and logger">
       <add-to-group group-id="KotlinGenerateGroup" anchor="first"/>
     </action>

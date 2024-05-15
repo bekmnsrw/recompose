@@ -1,4 +1,4 @@
-package com.bekmnsrw.recomposer
+package com.bekmnsrw.recomposer.action
 
 import com.bekmnsrw.recomposer.util.Constants.INSERT_RECOMPOSER_HIGHLIGHTER
 import com.bekmnsrw.recomposer.util.Constants.MODIFIER

@@ -1,4 +1,4 @@
-package com.bekmnsrw.recomposer
+package com.bekmnsrw.recomposer.action
 
 import com.bekmnsrw.recomposer.util.Constants.BLOCK_ELEMENT_TYPE
 import com.bekmnsrw.recomposer.util.Constants.COMPOSABLE_SHORT_NAME
