@@ -154,7 +154,7 @@ private fun stabilityOf(kotlinType: KotlinType): Stability = when {
         when {
             isStableCollection && unstableArgs.isEmpty() -> Stable
             !isStableCollection && unstableArgs.isNotEmpty() -> Unstable("1) Collection '${kotlinType.fqName}' is UNSTABLE. Use appropriate collection from 'kotlinx.collections.immutable' instead. 2) " + unstableArgs)
-            isStableCollection -> Unstable("Collection '${kotlinType.fqName}' is UNSTABLE. Use appropriate collection from 'kotlinx.collections.immutable' instead.")
+            !isStableCollection -> Unstable("Collection '${kotlinType.fqName}' is UNSTABLE. Use appropriate collection from 'kotlinx.collections.immutable' instead.")
             unstableArgs.isNotEmpty() -> Unstable(unstableArgs)
             else -> Unknown
         }
@@ -187,7 +187,7 @@ private fun stabilityOf(declaration: ClassDescriptor): Stability {
                 if (member.getter?.isDefault == false && !member.isVar && !member.isDelegated) continue
 
                 if (member.isVar && !member.isDelegated) {
-                    return Unstable("type '${declaration.name}' contains non-delegated var '${member.name}'.")
+                    return Unstable("type '${declaration.name}' contains non-delegated var '${member.name}'. Annotate class with @Stable/@Immutable or")
                 }
             }
         }
